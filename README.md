@@ -14,7 +14,7 @@ YouHon is a lightweight and powerful Ruby-based honeypot tool designed for netwo
 
  Logging System<br>
  
-Scan.txt: Records all scan attempts with source IP, port number, and timestamp.
+Scan.txt: Records all scan attempts with source IP, port number, and timestamp. <br>
 Log.txt: Logs every connection attempt with full details for forensic review.
 
 # Purpose

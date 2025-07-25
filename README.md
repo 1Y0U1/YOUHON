@@ -1,5 +1,34 @@
 # YOUHON
 
+YouHon - Honeypot & Intrusion Alert System
+YouHon is a lightweight and powerful Ruby-based honeypot tool designed for network defense and intrusion detection. It simulates vulnerable services to deceive attackers, detect scanning or unauthorized access attempts, and raise alerts instantly.
+
+⚠ Designed to deceive attackers. Built to alert defenders.
+
+# Features
+<u> Fake Service Emulation<u>
+Emulates common services (FTP, SSH, Telnet, etc.) on selected ports to attract and trap scans or unauthorized connection attempts.
+
+ <u> Real-time Scan Detection <u>
+Monitors the system for suspicious activity and detects port scans or connection attempts instantly.
+
+<u> Intrusion Sound Alert<u>
+Triggers a loud audio alert (inspired by Mr. Robot) when any intrusion or scanning is detected.
+
+<u> Logging System<u>
+scan.txt: Records all scan attempts with source IP, port number, and timestamp.
+
+log.txt: Logs every connection attempt with full details for forensic review.
+
+# Purpose
+Built for defenders, YouHon helps:
+
+Identify unauthorized scanning activity
+
+Gather early warning signs of potential attacks
+
+Improve your network visibility and threat awareness
+
 
 # Installation
 git clone https://github.com/1Y0U1/YOUHON.git <br>

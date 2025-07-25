@@ -1,0 +1,764 @@
+#!/usr/bin/ruby
+require 'socket'
+require 'colorize'
+require 'timeout'
+require 'openssl'
+require 'webrick'
+require 'webrick/https'
+require 'packetgen'
+require 'optparse'
+
+ $stderr.reopen(File::NULL, "w")  
+
+
+#ctrl+z
+ if Signal.trap("TSTP") do 
+   puts "\n[*] Press Ctrl + c to exit  :)"
+ end
+end
+
+
+#OPtions
+
+options = {}
+begin
+OptionParser.new do |opts|
+  opts.banner = "Usage: ruby youhon [options]"
+   opts.on('-a','--all','Starting Honeypot on all ports') do
+    options[:all] = true 
+  end
+
+  opts.on('-h','--help', 'Show Help') do 
+       puts `figlet YOUHON`.colorize(:blue).bold
+    puts "-"*65
+    puts "        YOUHON - Ruby based Honeypot".colorize(:light_blue).bold
+    puts "                Developed by Rubal Sharma (YOU)".colorize(:red).bold
+    puts "-" * 65
+
+    puts opts 
+    exit
+  end
+  opts.separator ""
+
+opts.on("    Specify single protocol or Multiple Protocol (FTP,SSH,RDP,SMB,LDAP,SMTP,HTTPS,MYSQL,TELNET)") 
+  opts.separator ""
+
+
+  opts.on("Example: ruby youhon -a")
+  opts.on("Example: ruby youhon ftp")
+  opts.on("Example: ruby youhon -p ftp ssh https Telnet")
+
+end.parse!
+
+rescue OptionParser::MissingArgument
+  puts "Option must be specified. See Example"
+end
+
+  if options.empty? && ARGV.empty?
+    puts "Use -h for help"
+  end
+
+
+
+
+#FTP
+def honeypot_ftp()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('21','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 21......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 70
+
+puts "[+] FTP Connection From #{ip}:#{port}     #{Time.now}"
+f.puts "[+] #{Time.now}   FTP Connection From #{ip}:#{port}"
+f.puts "*" * 100
+
+begin 
+client.puts "220 (vsftpd 3.0.5)"
+sleep 0.5
+client.puts "321 Please specify password"
+sleep 0.5
+client.puts "421 Check Your Internet Connection "  
+sleep 0.5
+
+rescue  Errno::EPIPE
+end
+begin
+Timeout.timeout(10) do
+while data = client.gets
+  puts "[>] #{ip} says: #{data.strip}".colorize(:yellow)
+  f.puts "[>] #{Time.now}   #{ip} says: #{data.strip}"
+  f.puts "*" * 100
+end
+
+end
+rescue Timeout::Error,Errno::EPIPE
+    puts "[!] Timeout from #{ip}".colorize(:yellow)
+    client.puts "Check Your Internet Connection"
+
+end
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "[-] Address Already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+
+#SSH
+def honeypot_ssh()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('22','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 22......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 70
+
+puts "[+] SSH Connection From #{ip}:#{port}     #{Time.now}"
+f.puts "[+] #{Time.now}   SSH Connection From #{ip}:#{port}"
+f.puts "*" * 100
+
+begin 
+
+
+ data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data}"
+   rescue Errno::EPIPE
+      sleep 5
+
+end
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "Address Already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+#SMTP
+def honeypot_smtp()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('25','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 25......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] SMTP Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   SMTP Connection From #{ip}:#{port}"
+f.puts "*" * 100
+
+begin 
+
+
+  data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+   client.puts("502 5.5.2 Error: check internet connection")
+ rescue Errno::EPIPE
+    sleep 6
+
+end
+
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "Address Already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+#SMB
+def honeypot_smb()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('445','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 445......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] SMB Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   SMB Connection From #{ip}:#{port}"
+
+f.puts "*" * 100
+
+begin 
+
+
+  data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+    client.puts "[!] Check Internet Connection"
+    rescue Errno::EPIPE
+        sleep 6
+
+end
+ 
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "Address Already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+#LDAP
+def honeypot_ldap()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('389','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 389......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] LDAP Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   LDAP Connection From #{ip}:#{port}"
+
+f.puts "*" * 100
+
+begin 
+
+
+  data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+    client.puts("[!] Check Internet Connection")
+    rescue Errno::EPIPE
+        sleep 6
+
+end
+ 
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "Address Already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+
+#SNMP
+def honeypot_snmp()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_DGRAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('161','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 161......".colorize(:green).bold
+puts ""
+
+
+loop{
+data, addr = s.recvfrom(1024)
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = addr.ip_unpack
+puts "-" * 80
+
+puts "[+] SNMP Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   SNMP Connection From #{ip}:#{port}"
+f.puts "*" * 100
+
+
+begin 
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+           rescue Errno::EPIPE
+        sleep 6
+end
+
+}
+  s.close()
+rescue Errno::EADDRINUSE
+  puts "[-] Address already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+#TELNET
+
+def honeypot_telnet()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('23','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 23......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] TELNET Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   TELNET Connection From #{ip}:#{port}"
+
+f.puts "*" * 100
+
+begin 
+
+
+  data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+    client.puts(" Check Internet Connection")
+    rescue Errno::EPIPE
+        sleep 6
+
+end
+ 
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "Address already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+#RDP
+def honeypot_rdp()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('3389','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 3389......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] RDP Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   RDP Connection From #{ip}:#{port}"
+
+f.puts "*" * 100
+
+begin 
+
+
+  data = client.gets
+  puts "[>] #{ip} says: #{data}".colorize(:yellow) 
+   f.puts "[>] #{ip} says: #{data.inspect}"
+    client.puts("[!] Check Internet Connection")
+    rescue Errno::EPIPE
+        sleep 6
+
+end
+ 
+  client.close()
+}
+rescue Errno::EADDRINUSE
+puts "[-] Address already in USE".colorize(:red).bold
+exit
+end
+end
+end
+
+
+
+#Mysql
+def honeypot_mysql()
+  File.open("logs.txt",'a+') do |f|
+begin
+s = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM)
+s.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
+
+addr = Socket.sockaddr_in('3306','0.0.0.0')
+s.bind(addr)
+
+puts "[*] Starting HoneyPot on 3306......".colorize(:green).bold
+puts ""
+s.listen(15)
+
+
+loop{
+client, client_addr = s.accept()
+
+Thread.new { `aplay alert.wav 2> /dev/null` }
+
+ip, port = client_addr.ip_unpack
+puts "-" * 80
+
+puts "[+] MYsql Connection From #{ip}:#{port}    #{Time.now}"
+f.puts "[+] #{Time.now}   Mysql Connection From #{ip}:#{port}"
+
+f.puts "*" * 100
+
+begin 
+    client.puts("[!] Check Internet Connection")
+    rescue Errno::EPIPE
+        sleep 6
+end
+ 
+  client.close()
+}
+rescue Errno::EADDRINUSE
+  puts "[-] Address already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+#HTTPS
+def honeypot_https()
+    File.open("logs.txt",'a+') do |f|
+
+  begin
+    begin
+  cert = OpenSSL::X509::Certificate.new(File.read("cert.pem"))
+  key = OpenSSL::PKey::RSA.new(File.read("key.pem"))
+
+    rescue Errno::ENOENT
+      puts "[!] Key and Certificate Not Found" 
+      puts "[+] Use this Command to make-->   openssl req -new -x509 -days 365  -nodes -out cert.pem -keyout key.pem".colorize(:red).bold
+      exit 
+    end
+
+
+  log = WEBrick::Log.new(File::NULL,WEBrick::Log::FATAL)
+
+  server = WEBrick::HTTPServer.new(
+   Port: 443,
+   SSLEnable: true,
+   SSLCertificate: cert,
+   SSLPrivateKey: key,
+   DocumentRoot: nil,
+   Logger: log,
+   AccessLog:[] 
+  )
+
+ server.mount_proc '/' do |req, res|
+  puts "-"*80
+    puts "[*] Request Detected......".colorize(:red).bold
+    f.puts("[+] #{Time.now}  HTTPS Connection From  #{req.peeraddr[2]}:#{req.peeraddr[1]}")
+    f.puts("[>] User-Agent: #{req['User-Agent']}")
+    f.puts "*" * 100
+    Thread.new { `aplay alert.wav 2> /dev/null` }
+
+
+    puts "Method:  #{req.request_method}"
+    puts "Path:    #{req.path}"
+    puts "From:    #{req.peeraddr[2]}:#{req.peeraddr[1]}"
+    puts "User-Agent: #{req['User-Agent']}"
+    puts "Header:  #{req.header}"
+     res.body =  <<~HTML
+                     <html>
+                     <head>
+                      <title>404</title>
+                     </head>
+                     <body>
+                    <b> 404 Not Found<b>
+                     </body>
+                     </html>
+                     HTML
+
+  end
+   
+  puts "[*] Honeypot Started on 443 HTTPS........".colorize(:green).bold
+  puts ""
+  server.start
+rescue Errno::EADDRINUSE
+  puts "[-] Address already in USE".colorize(:red).bold
+  exit
+end
+end
+end
+
+
+
+
+def honeypot_tcp_udp
+  File.open('scan.txt','a+') do |f|
+  # puts "[*] Honeypot TCP/UDP monitor started..."
+
+  PacketGen.capture(iface: 'eth0', promisc: true, filter: 'tcp or udp') do |pkt|
+    if pkt.is?('IP')
+      src_ip = pkt.ip.src
+      dst_ip = pkt.ip.dst
+
+      # TCP detection
+      if pkt.is?('TCP')
+        sport = pkt.tcp.sport
+        dport = pkt.tcp.dport
+
+        if sport == 21 || dport == 21
+          Thread.new { `aplay alert.wav 2> /dev/null` }
+
+          puts "[!] FTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+          f.puts "*" * 150
+          f.puts "[!] FTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+        elsif sport == 22 || dport == 22
+          Thread.new { `aplay alert.wav 2> /dev/null` }
+
+          puts "[!] SSH TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe SomeOne try to scan Your System"
+                    f.puts "*" * 150
+          f.puts "[!] SSH TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe SomeOne try to scan Your System"
+
+        elsif sport == 23 || dport == 23
+          Thread.new { `aplay alert.wav 2> /dev/null` }
+
+          puts "[!] Telnet TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                    f.puts "*" * 150
+
+          f.puts "[!] Telnet TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+        elsif sport == 25 || dport == 25
+          Thread.new { `aplay alert.wav 2> /dev/null` }
+
+        puts "[!] SMTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                  f.puts "*" * 150
+
+        f.puts "[!] SMTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+        elsif sport == 445 || dport == 445
+          Thread.new { `aplay alert.wav 2> /dev/null` }
+
+        puts "[!] SMB TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                  f.puts "*" * 150
+
+        f.puts "[!] SMB TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+      elsif sport == 389 || dport == 389
+        Thread.new { `aplay alert.wav 2> /dev/null` }
+
+              puts "[!] LDAP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                        f.puts "*" * 150
+
+              f.puts "[!] LDAP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+     elsif sport == 3389 || dport ==3389
+      Thread.new { `aplay alert.wav 2> /dev/null` }
+
+                        puts "[!] RDP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                                 f.puts "*" * 150
+
+                        f.puts "[!] RDP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+     elsif sport == 3306 || dport == 3306
+      Thread.new { `aplay alert.wav 2> /dev/null` }
+
+      puts "[!] MYSQL TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                f.puts "*" * 150
+
+      f.puts "[!] MYSQL TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+    elsif sport == 80 || dport == 80
+      Thread.new { `aplay alert.wav 2> /dev/null` }
+
+      puts "[!] HTTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+                f.puts "*" * 150  
+
+      f.puts "[!] HTTP TCP Scan Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe Someone Try to scan Your System"
+
+
+end
+       
+      # UDP detection
+      elsif pkt.is?('UDP')
+        sport = pkt.udp.sport
+        dport = pkt.udp.dport
+
+        if sport == 53 || dport == 53
+          puts "[!] DNS UDP Traffic Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe SomeOne try to Scan your system".colorize(:yellow)
+              Thread.new { `aplay alert.wav 2> /dev/null` }
+
+                         f.puts "*" * 150
+          f.puts "[!] DNS UDP Traffic Detected from #{src_ip}:#{sport} -> #{dst_ip}:#{dport}    #{Time.now}    Maybe SomeOne try to Scan your system"
+end
+      end
+      end
+    end
+  end
+end
+
+valid_protocols = %w[ftp ssh rdp smb ldap smtp snmp https mysql telnet]
+
+
+selected_protocols = ARGV.map(&:downcase)  # Convert input to lowercase
+invalid = selected_protocols - valid_protocols
+
+if invalid.any?
+  puts "[!] Invalid protocol: #{invalid.join}"
+  puts "Usage: ruby honeypot2.rb [#{valid_protocols.join(', ')}]"
+  exit
+end
+
+threads = []
+
+
+selected_protocols.each do |protocol|
+  case protocol
+  when "ftp"
+    threads << Thread.new { honeypot_ftp }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "ssh"
+    threads << Thread.new { honeypot_ssh }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "rdp"
+    threads << Thread.new { honeypot_rdp }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "smb"
+    threads << Thread.new { honeypot_smb }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "ldap"
+    threads << Thread.new { honeypot_ldap }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "smtp"
+    threads << Thread.new { honeypot_smtp }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "snmp"
+    threads << Thread.new { honeypot_snmp }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "https"
+    threads << Thread.new { honeypot_https }
+  when "mysql"
+    threads << Thread.new { honeypot_mysql }
+    threads << Thread.new { honeypot_tcp_udp }
+  when "telnet"
+    threads << Thread.new { honeypot_telnet }
+    threads << Thread.new { honeypot_tcp_udp }
+  end
+end
+
+# Let all threads keep running
+threads.each(&:join)
+
+
+if options[:all]
+ puts "[*] Honeypot Started on all protocls (FTP,SSH,RDP,SMB,LDAP,SMTP,HTTPS,MYSQL,TELNET)".colorize(:blue).bold
+ threads = []
+
+threads << Thread.new { honeypot_ftp() }
+threads << Thread.new { honeypot_ssh() }
+threads << Thread.new { honeypot_rdp() }
+threads << Thread.new { honeypot_smb() }
+threads << Thread.new { honeypot_ldap() }
+threads << Thread.new { honeypot_smtp() }
+threads << Thread.new { honeypot_snmp() }
+threads << Thread.new { honeypot_https() }
+threads << Thread.new { honeypot_tcp_udp() }
+threads << Thread.new { honeypot_mysql() }
+threads << Thread.new { honeypot_telnet() }
+
+threads.each(&:join)
+
+end
+
+
+

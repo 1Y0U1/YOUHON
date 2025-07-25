@@ -115,7 +115,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "[-] Address Already in USE".colorize(:red).bold
+  puts "[-] FTP Address Already in USE".colorize(:red).bold
   exit
 end
 end
@@ -164,7 +164,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "Address Already in USE".colorize(:red).bold
+  puts "[-] SSH Address Already in USE".colorize(:red).bold
   exit
 end
 end
@@ -213,7 +213,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "Address Already in USE".colorize(:red).bold
+  puts "[-] SMTP Address Already in USE".colorize(:red).bold
   exit
 end
 end
@@ -264,7 +264,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "Address Already in USE".colorize(:red).bold
+  puts "[-] SMB Address Already in USE".colorize(:red).bold
   exit
 end
 end
@@ -314,7 +314,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "Address Already in USE".colorize(:red).bold
+  puts "[-] LDAP Address Already in USE".colorize(:red).bold
   exit
 end
 end
@@ -360,7 +360,7 @@ end
 }
   s.close()
 rescue Errno::EADDRINUSE
-  puts "[-] Address already in USE".colorize(:red).bold
+  puts "[-] SNMP Address already in USE".colorize(:red).bold
   exit
 end
 end
@@ -412,7 +412,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "Address already in USE".colorize(:red).bold
+  puts "[-] Telnet Address already in USE".colorize(:red).bold
   exit
 end
 end
@@ -463,7 +463,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-puts "[-] Address already in USE".colorize(:red).bold
+puts "[-] RDP Address already in USE".colorize(:red).bold
 exit
 end
 end
@@ -508,7 +508,7 @@ end
   client.close()
 }
 rescue Errno::EADDRINUSE
-  puts "[-] Address already in USE".colorize(:red).bold
+  puts "[-] MYSQL Address already in USE".colorize(:red).bold
   exit
 end
 end
@@ -573,7 +573,7 @@ def honeypot_https()
   puts ""
   server.start
 rescue Errno::EADDRINUSE
-  puts "[-] Address already in USE".colorize(:red).bold
+  puts "[-] HTTPS Address already in USE".colorize(:red).bold
   exit
 end
 end

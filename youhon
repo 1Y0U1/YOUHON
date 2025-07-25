@@ -46,7 +46,7 @@ opts.on("    Specify single protocol or Multiple Protocol (FTP,SSH,RDP,SMB,LDAP,
 
   opts.on("Example: ruby youhon -a")
   opts.on("Example: ruby youhon ftp")
-  opts.on("Example: ruby youhon -p ftp ssh https Telnet")
+  opts.on("Example: ruby youhon ftp ssh https Telnet")
 
 end.parse!
 

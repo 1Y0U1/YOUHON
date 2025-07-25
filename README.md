@@ -6,16 +6,16 @@ YouHon is a lightweight and powerful Ruby-based honeypot tool designed for netwo
 ⚠ Designed to deceive attackers. Built to alert defenders.
 
 # Features
-<u> Fake Service Emulation<u>
-Emulates common services (FTP, SSH, Telnet, etc.) on selected ports to attract and trap scans or unauthorized connection attempts.
- <u> Real-time Scan Detection <u>
-Monitors the system for suspicious activity and detects port scans or connection attempts instantly.
-<u> Intrusion Sound Alert<u>
-Triggers a loud audio alert (inspired by Mr. Robot) when any intrusion or scanning is detected.
-<u> Logging System<u> <br>
-scan.txt: Records all scan attempts with source IP, port number, and timestamp.
+ Fake Service Emulation:    Emulates common services (FTP, SSH, Telnet, etc.) on selected ports to attract and trap scans or unauthorized connection attempts.
 
-log.txt: Logs every connection attempt with full details for forensic review.
+ Real-time Scan Detection:    Monitors the system for suspicious activity and detects port scans or connection attempts instantly.
+ 
+ Intrusion Sound Alert:      Triggers a loud audio alert (inspired by Mr. Robot) when any intrusion or scanning is detected.
+
+ Logging System<br>
+ 
+Scan.txt: Records all scan attempts with source IP, port number, and timestamp.
+Log.txt: Logs every connection attempt with full details for forensic review.
 
 # Purpose
 Built for defenders, YouHon helps:

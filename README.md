@@ -17,13 +17,13 @@ Scan.txt: Records all scan attempts with source IP, port number, and timestamp. 
 Log.txt: Logs every connection attempt with full details for forensic review.
 
 # Purpose
-Built for defenders, YouHon helps:
+> Built for defenders, YouHon helps:
 
-Identify unauthorized scanning activity
+> Identify unauthorized scanning activity
 
-Gather early warning signs of potential attacks
+> Gather early warning signs of potential attacks
 
-Improve your network visibility and threat awareness
+> Improve your network visibility and threat awareness
 
 
 # Installation

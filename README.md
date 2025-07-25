@@ -1,6 +1,5 @@
 # YOUHON - Honeypot & Intrusion Alert System
 
-YouHon - Honeypot & Intrusion Alert System
 YouHon is a lightweight and powerful Ruby-based honeypot tool designed for network defense and intrusion detection. It simulates vulnerable services to deceive attackers, detect scanning or unauthorized access attempts, and raise alerts instantly.
 
 ⚠ Designed to deceive attackers. Built to alert defenders.

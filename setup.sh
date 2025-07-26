@@ -21,6 +21,7 @@ sudo gem install packetgen
 echo ""
 sudo gem install optparse
 echo ""
+sudo chmod +x alert.wav
 echo "\n***done***\n"
 clear
 echo ""

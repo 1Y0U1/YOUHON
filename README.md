@@ -33,3 +33,6 @@ chmod +x setup.sh<br>
 bash setup.sh<br>
 chmod +x youhon<br>
 ./youhon -h
+
+# OUTPUT
+<img width="1212" height="1080" alt="Screenshot_2025-07-26_02_58_28" src="https://github.com/user-attachments/assets/19115b6b-abb8-4e63-b86c-bdb9dad59200" />

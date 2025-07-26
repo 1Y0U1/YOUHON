@@ -27,7 +27,7 @@ Log.txt: Logs every connection attempt with full details for forensic review.
 
 
 # OUTPUT
-<img width="1212" height="1080" alt="Screenshot_2025-07-26_02_58_28" src="https://github.com/user-attachments/assets/19115b6b-abb8-4e63-b86c-bdb9dad59200" />
+<img width="1211" height="874" alt="Screenshot_2025-07-26_03_06_47" src="https://github.com/user-attachments/assets/9e49b8a8-69da-48a6-bf24-086b2280cb53" />
 
 
 # Installation
